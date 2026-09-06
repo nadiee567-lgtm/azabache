@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Azabache · manual</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#0c0d10; color:#d7d9de; font:15px/1.5 ui-sans-serif,system-ui,sans-serif; padding:1.2rem; max-width:720px; }
+  h1 { font-family:ui-monospace,monospace; letter-spacing:.15em; font-size:1.1rem; margin:0 0 .3rem; }
+  .sub { color:#7f8794; font-size:.8rem; margin:0 0 1rem; }
+  .num { font-family:ui-monospace,monospace; color:#8fb3d9; font-weight:700; }
+  .step { border:1px solid #2b3038; border-radius:10px; padding:.8rem; margin:.7rem 0; }
+  .step h3 { margin:0 0 .5rem; font-size:.85rem; color:#aeb4bf; font-family:ui-monospace,monospace; }
+  textarea { width:100%; box-sizing:border-box; background:#15171b; border:1px solid #2b3038; color:#cfe0f2; border-radius:8px; padding:.5rem; font-family:ui-monospace,monospace; font-size:.72rem; resize:vertical; min-height:4.5rem; }
+  input { flex:1; min-width:10rem; background:#15171b; border:1px solid #2b3038; color:#d7d9de; border-radius:8px; padding:.55rem .7rem; font:inherit; }
+  button { background:#243447; border:1px solid #35506b; color:#cfe0f2; border-radius:8px; padding:.5rem .9rem; font:inherit; cursor:pointer; margin-top:.4rem; }
+  .row { display:flex; gap:.5rem; margin:.5rem 0; flex-wrap:wrap; }
+  #status { font-family:ui-monospace,monospace; font-size:.78rem; color:#7f8794; }
+  #log { border:1px solid #2b3038; border-radius:8px; padding:.6rem; min-height:8rem; margin:.6rem 0; }
+  #log div { padding:.15rem 0; }
+</style>
+</head>
+<body>
+  <h1>◆ AZABACHE</h1>
+  <p class="sub">No server. Trade a code out of band, connect directly, end-to-end encrypted.</p>
+  <p>Your number: <span id="myNumber" class="num">…</span>
+     <button id="wipeBtn" style="margin-left:.6rem;border-color:#5b2b2b;color:#e0a0a0">delete account</button></p>
+  <p id="status">generating identity…</p>
+
+  <div class="step" id="contactsBox" hidden>
+    <h3>contacts (saved on this device only)</h3>
+    <div id="contacts"></div>
+  </div>
+
+  <div class="step">
+    <h3>A · start here (you invite)</h3>
+    <button id="createBtn">create invite code</button>
+    <textarea id="outCode" readonly placeholder="your code will appear here — send it to the other person"></textarea>
+  </div>
+
+  <div class="step">
+    <h3>B · paste what you received</h3>
+    <textarea id="inCode" placeholder="paste the invite (or the answer) here"></textarea>
+    <button id="useBtn">use code</button>
+  </div>
+
+  <div id="chat" hidden>
+    <p>connected to <span id="peer" class="num"></span> · <span id="presence">…</span></p>
+    <div id="log"></div>
+    <div class="row">
+      <input id="msg" placeholder="type a message…" autocomplete="off">
+      <button id="sendBtn">send</button>
+      <button id="photoBtn">photo</button>
+      <input id="photoFile" type="file" accept="image/*" hidden>
+    </div>
+  </div>
+
+  <script src="identity.js"></script>
+  <script src="store.js"></script>
+  <script src="photo.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
