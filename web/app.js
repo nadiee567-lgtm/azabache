@@ -247,6 +247,37 @@ $('useBtn').onclick = () => { const c = $('inCode').value.trim(); if (c) useCode
 $('sendBtn').onclick = send;
 $('msg').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 $('photoBtn').onclick = () => $('photoFile').click();
+// ---- optional Teams (group) mode ----
+let team = null;
+function teamLog(who, text) {
+  const d = document.createElement('div'); d.textContent = who + ': ' + text; $('teamLog').appendChild(d);
+}
+function parseMembers() {
+  // each line: "NUMBER pubkey"
+  return $('members').value.trim().split('\n').map((ln) => {
+    const [number, pub] = ln.trim().split(/\s+/);
+    return number && pub ? { number, pub } : null;
+  }).filter(Boolean);
+}
+$('teamsBtn').onclick = () => {
+  const url = $('mbUrl').value.trim();
+  if (!url) { $('teamsStatus').textContent = 'no URL — staying serverless (P2P)'; return; }
+  const roster = parseMembers();
+  team = Teams.connect(url, { number: me.number, pub: me.pub, privateKey: me.privateKey }, {
+    onReady: () => { $('teamsStatus').textContent = 'connected · ' + roster.length + ' member(s)';
+      $('teamLog').hidden = false; $('teamSendRow').hidden = false; },
+    onMessage: (m) => teamLog(m.from.slice(0, 9) + '…', m.text)
+  });
+  team.setMembers(roster);
+  $('teamsStatus').textContent = 'connecting…';
+};
+$('teamSendBtn').onclick = async () => {
+  const t = $('teamMsg').value.trim();
+  if (!t || !team) return;
+  await team.send(t, 'G1');
+  teamLog('me', t); $('teamMsg').value = '';
+};
+
 $('photoFile').onchange = (e) => { const f = e.target.files[0]; if (f) sendPhoto(f); e.target.value = ''; };
 $('fileBtn').onclick = () => $('anyFile').click();
 $('anyFile').onchange = (e) => { const f = e.target.files[0]; if (f) sendFile(f); e.target.value = ''; };

@@ -47,8 +47,7 @@ function deliver(to) {
   const q = queues.get(to) || [];
   const pending = q.filter((m) => !m._sent);
   for (const m of pending) {
-    const { _sent, ...wire } = m;
-    sock.send(JSON.stringify({ type: 'msg', ...wire }));
+    sock.send(JSON.stringify({ type: 'msg', id: m.id, from: m.from, to: m.to, payload: m.payload, ts: m.ts }));
     m._sent = true;
   }
   if (!KEEP) queues.set(to, q.filter((m) => !m._sent)); // drop delivered unless KEEP
@@ -68,12 +67,18 @@ wss.on('connection', (ws) => {
       return;
     }
 
-    // send: store an ENCRYPTED message for one or more recipient numbers.
-    // The server never sees plaintext — iv/ct are opaque blobs.
-    if (m.type === 'send' && Array.isArray(m.to)) {
-      const base = { id: seq++, from: ws.number, group: m.group || null, iv: m.iv, ct: m.ct, ts: Date.now() };
-      for (const to of m.to) { enqueue(to, { ...base, to }); deliver(to); }
-      ws.send(JSON.stringify({ type: 'ack', id: base.id }));
+    // send: deliver one ENCRYPTED item per recipient. Each item is
+    // { to, payload } where payload is an OPAQUE string the server never parses
+    // (it holds the per-recipient ciphertext + key envelope). The server learns
+    // nothing but routing metadata (from/to/time/size).
+    if (m.type === 'send' && Array.isArray(m.items)) {
+      const id = seq++;
+      for (const it of m.items) {
+        if (!it || !it.to) continue;
+        enqueue(it.to, { id, from: ws.number, to: it.to, payload: it.payload, ts: Date.now() });
+        deliver(it.to);
+      }
+      ws.send(JSON.stringify({ type: 'ack', id }));
       return;
     }
 
