@@ -224,6 +224,8 @@ async function startApp() {
   $('myNumber').textContent = me.number;
   setStatus('ready — no server involved');
   await renderContacts();   // real mode: shows saved contacts; decoy: empty
+  $('mbUrl').value = Session.getTeam().url || '';   // restore saved team settings
+  renderRoster();
 }
 
 (async () => {
@@ -252,17 +254,38 @@ let team = null;
 function teamLog(who, text) {
   const d = document.createElement('div'); d.textContent = who + ': ' + text; $('teamLog').appendChild(d);
 }
-function parseMembers() {
-  // each line: "NUMBER pubkey"
-  return $('members').value.trim().split('\n').map((ln) => {
-    const [number, pub] = ln.trim().split(/\s+/);
-    return number && pub ? { number, pub } : null;
-  }).filter(Boolean);
+
+// render the saved roster with a remove (✕) button per member; persists in the vault
+function renderRoster() {
+  const box = $('roster'); box.textContent = '';
+  const members = Session.getTeam().members;
+  for (const m of members) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-family:ui-monospace,monospace;font-size:.72rem;padding:.15rem 0';
+    const label = document.createElement('span'); label.textContent = m.number;
+    const x = document.createElement('button'); x.textContent = '✕';
+    x.style.cssText = 'border-color:#5b2b2b;color:#e0a0a0;padding:.1rem .45rem';
+    x.onclick = () => { Session.removeMember(m.number); renderRoster(); if (team) team.setMembers(Session.getTeam().members); };
+    row.appendChild(label); row.appendChild(x); box.appendChild(row);
+  }
 }
-$('teamsBtn').onclick = () => {
+
+$('addMemberBtn').onclick = () => {
+  const lines = $('members').value.trim().split('\n');
+  for (const ln of lines) {
+    const [number, pub] = ln.trim().split(/\s+/);
+    if (number && pub) Session.addMember({ number, pub });
+  }
+  $('members').value = '';
+  renderRoster();
+  if (team) team.setMembers(Session.getTeam().members);   // live: new members apply at once
+};
+
+$('teamsBtn').onclick = async () => {
   const url = $('mbUrl').value.trim();
   if (!url) { $('teamsStatus').textContent = 'no URL — staying serverless (P2P)'; return; }
-  const roster = parseMembers();
+  Session.setTeamUrl(url);
+  const roster = Session.getTeam().members;
   team = Teams.connect(url, { number: me.number, pub: me.pub, privateKey: me.privateKey }, {
     onReady: () => { $('teamsStatus').textContent = 'connected · ' + roster.length + ' member(s)';
       $('teamLog').hidden = false; $('teamSendRow').hidden = false; },

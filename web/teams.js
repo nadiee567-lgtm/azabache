@@ -49,6 +49,7 @@
 
     return {
       setMembers: (list) => { members = list; },
+      getMembers: () => members,
       send,
       isReady: () => ready,
       close: () => ws.close(),

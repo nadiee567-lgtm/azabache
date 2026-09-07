@@ -65,7 +65,9 @@
       Leave empty to stay serverless (P2P). To use groups + offline delivery, run your
       own mailbox (<code>node server/mailbox.js</code>) and put its address here.</p>
     <input id="mbUrl" placeholder="ws://your-server:8811" style="width:100%;box-sizing:border-box;background:#15171b;border:1px solid #2b3038;color:#d7d9de;border-radius:8px;padding:.5rem .7rem;font:inherit;margin:.3rem 0">
-    <textarea id="members" placeholder='group members, one per line:  NUMBER pubkey' style="width:100%;box-sizing:border-box;background:#15171b;border:1px solid #2b3038;color:#cfe0f2;border-radius:8px;padding:.5rem;font-family:ui-monospace,monospace;font-size:.72rem;min-height:4rem"></textarea>
+    <div id="roster" style="margin:.4rem 0"></div>
+    <textarea id="members" placeholder='add member(s), one per line:  NUMBER pubkey' style="width:100%;box-sizing:border-box;background:#15171b;border:1px solid #2b3038;color:#cfe0f2;border-radius:8px;padding:.5rem;font-family:ui-monospace,monospace;font-size:.72rem;min-height:3rem"></textarea>
+    <button id="addMemberBtn">add member(s)</button>
     <button id="teamsBtn">connect team</button>
     <span id="teamsStatus" style="font-family:ui-monospace,monospace;font-size:.75rem;color:#7f8794;margin-left:.5rem"></span>
     <div id="teamLog" style="border:1px solid #2b3038;border-radius:8px;padding:.5rem;margin:.5rem 0;min-height:4rem" hidden></div>

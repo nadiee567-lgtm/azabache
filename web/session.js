@@ -20,7 +20,7 @@
   let realPassword = null;  // held in memory only during a real session
   let data = { contacts: [], messages: [] };
 
-  const empty = () => ({ contacts: [], messages: [] });
+  const empty = () => ({ contacts: [], messages: [], team: { url: '', members: [] } });
 
   // First run? (no vault yet)
   const isFirstRun = async () => !(await Store.getVault());
@@ -40,6 +40,7 @@
     if (!blob) return { firstRun: true };
     try {
       data = JSON.parse(await Vault.decryptText(blob, password));
+      if (!data.team) data.team = { url: '', members: [] }; // migrate older vaults
       realPassword = password;
       mode = 'real';
       return { mode: 'real', data };
@@ -77,5 +78,20 @@
   const historyWith = (peer) => data.messages.filter((m) => m.peer === peer);
   const getMode = () => mode;
 
-  root.Session = { isFirstRun, setup, unlock, persist, getData, addContact, addMessage, historyWith, getMode };
+  // ---- team roster (persisted, encrypted, in the vault) ----
+  // Mutations are SYNCHRONOUS in memory so the live group + UI update at once;
+  // the encrypted save runs in the background (serialized by persist's writeChain).
+  // This way removing a member takes effect immediately, not after the disk write.
+  const getTeam = () => data.team || { url: '', members: [] };
+  function setTeamUrl(url) { data.team.url = url; persist(); }
+  function addMember(m) {
+    if (!data.team.members.some((x) => x.number === m.number)) { data.team.members.push(m); persist(); }
+  }
+  function removeMember(number) {
+    data.team.members = data.team.members.filter((x) => x.number !== number);
+    persist();
+  }
+
+  root.Session = { isFirstRun, setup, unlock, persist, getData, addContact, addMessage,
+    historyWith, getMode, getTeam, setTeamUrl, addMember, removeMember };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
