@@ -1,0 +1,24 @@
+{
+  "name": "azabache",
+  "version": "1.0.0",
+  "description": "A minimal, private, peer-to-peer web messenger. **No server ever reads your messages or stores your contacts.** Built for important, private conversations.",
+  "main": "server/mailbox.js",
+  "scripts": {
+    "start": "node server/mailbox.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nadiee567-lgtm/azabache.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nadiee567-lgtm/azabache/issues"
+  },
+  "homepage": "https://github.com/nadiee567-lgtm/azabache#readme",
+  "dependencies": {
+    "ws": "^8.21.3"
+  }
+}
