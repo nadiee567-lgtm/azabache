@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Azabache · cifrar</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#0c0d10; color:#d7d9de; font:15px/1.5 ui-sans-serif,system-ui,sans-serif; padding:1.2rem; max-width:680px; }
+  h1 { font-family:ui-monospace,monospace; letter-spacing:.15em; font-size:1.05rem; margin:0 0 .3rem; }
+  .sub { color:#7f8794; font-size:.82rem; margin:0 0 1.1rem; }
+  textarea { width:100%; box-sizing:border-box; background:#15171b; border:1px solid #2b3038; color:#cfe0f2; border-radius:8px; padding:.6rem; font-family:ui-monospace,monospace; font-size:.8rem; resize:vertical; min-height:6rem; }
+  input[type=password] { width:100%; box-sizing:border-box; background:#15171b; border:1px solid #2b3038; color:#d7d9de; border-radius:8px; padding:.55rem .7rem; font:inherit; margin:.5rem 0; }
+  button { background:#243447; border:1px solid #35506b; color:#cfe0f2; border-radius:8px; padding:.55rem .9rem; font:inherit; cursor:pointer; margin:.2rem .3rem .2rem 0; }
+  .row { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin:.4rem 0; }
+  label { font-size:.8rem; color:#aeb4bf; }
+  #status { font-family:ui-monospace,monospace; font-size:.78rem; color:#7f8794; min-height:1.1rem; }
+</style>
+</head>
+<body>
+  <h1>◆ AZABACHE · cifrar</h1>
+  <p class="sub">Cifra un mensaje o archivo con una contraseña. Solo esa contraseña lo abre.
+     Todo pasa en tu navegador — nada se sube a ningún lado.</p>
+
+  <label>Mensaje (o pega aquí un blob cifrado para descifrar):</label>
+  <textarea id="text" placeholder="escribe tu mensaje…"></textarea>
+
+  <input id="pw" type="password" placeholder="contraseña">
+
+  <div class="row">
+    <button id="encBtn">cifrar texto</button>
+    <button id="decBtn">descifrar texto</button>
+    <button id="copyBtn">copiar resultado</button>
+  </div>
+
+  <div class="row">
+    <label>Archivo:</label>
+    <input id="file" type="file">
+    <button id="encFileBtn">cifrar archivo</button>
+    <button id="decFileBtn">descifrar archivo (.azb)</button>
+  </div>
+
+  <p id="status"></p>
+
+  <script src="vault.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const setStatus = (s) => { $('status').textContent = s; };
+    const pw = () => $('pw').value;
+
+    $('encBtn').onclick = async () => {
+      if (!pw()) return setStatus('pon una contraseña');
+      try { $('text').value = await Vault.encryptText($('text').value, pw()); setStatus('cifrado ✓ — copia y envíalo'); }
+      catch (e) { setStatus('error al cifrar'); }
+    };
+    $('decBtn').onclick = async () => {
+      try { $('text').value = await Vault.decryptText($('text').value, pw()); setStatus('descifrado ✓'); }
+      catch (e) { setStatus('contraseña incorrecta o texto no válido'); }
+    };
+    $('copyBtn').onclick = async () => {
+      try { await navigator.clipboard.writeText($('text').value); setStatus('copiado al portapapeles'); }
+      catch (e) { setStatus('selecciona y copia manualmente'); }
+    };
+
+    function download(blob, name) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = name; a.click(); URL.revokeObjectURL(a.href);
+    }
+    $('encFileBtn').onclick = async () => {
+      const f = $('file').files[0]; if (!f) return setStatus('elige un archivo');
+      if (!pw()) return setStatus('pon una contraseña');
+      const blob = await Vault.encryptFile(f, pw());
+      download(new Blob([blob], { type: 'application/json' }), f.name + '.azb');
+      setStatus('archivo cifrado → ' + f.name + '.azb');
+    };
+    $('decFileBtn').onclick = async () => {
+      const f = $('file').files[0]; if (!f) return setStatus('elige un archivo .azb');
+      try {
+        const blob = await Vault.decryptToBlob(await f.text(), pw());
+        download(blob, f.name.replace(/\.azb$/, '') || 'descifrado');
+        setStatus('archivo descifrado ✓');
+      } catch (e) { setStatus('contraseña incorrecta o archivo no válido'); }
+    };
+  </script>
+</body>
+</html>

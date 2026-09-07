@@ -22,6 +22,20 @@
 </style>
 </head>
 <body>
+  <div id="login">
+    <h1>◆ AZABACHE</h1>
+    <p class="sub" id="loginSub">…</p>
+    <input id="pw" type="password" placeholder="password" autocomplete="off"
+           style="width:100%;box-sizing:border-box;background:#15171b;border:1px solid #2b3038;color:#d7d9de;border-radius:8px;padding:.6rem .7rem;font-size:1rem;margin:.4rem 0">
+    <button id="enterBtn" style="background:#243447;border:1px solid #35506b;color:#cfe0f2;border-radius:8px;padding:.55rem 1rem;font:inherit;cursor:pointer">enter</button>
+    <p id="loginMsg" style="font-family:ui-monospace,monospace;font-size:.75rem;color:#7f8794;min-height:1.1rem"></p>
+    <p class="sub" style="font-size:.72rem;color:#5c636e;margin-top:1rem">
+      Your real password opens your account. Any other password opens a clean empty
+      one — so a forced glance shows nothing. Protects against a casual look, not a
+      forensic lab.</p>
+  </div>
+
+  <div id="appMain" hidden>
   <h1>◆ AZABACHE</h1>
   <p class="sub">No server. Trade a code out of band, connect directly, end-to-end encrypted.</p>
   <p>Your number: <span id="myNumber" class="num">…</span>
@@ -53,11 +67,17 @@
       <button id="sendBtn">send</button>
       <button id="photoBtn">photo</button>
       <input id="photoFile" type="file" accept="image/*" hidden>
+      <button id="fileBtn">file</button>
+      <input id="anyFile" type="file" hidden>
     </div>
   </div>
 
+  </div><!-- /appMain -->
+
   <script src="identity.js"></script>
   <script src="store.js"></script>
+  <script src="vault.js"></script>
+  <script src="session.js"></script>
   <script src="photo.js"></script>
   <script src="app.js"></script>
 </body>
