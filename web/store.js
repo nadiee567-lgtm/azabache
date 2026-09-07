@@ -64,6 +64,10 @@
   const saveSelf = (obj) => tx('meta', 'readwrite', (s) => s.put({ id: 'self', ...obj }));
   const getSelf = () => tx('meta', 'readonly', (s) => s.get('self'));
 
+  // ---- encrypted vault (single blob; only the real password decrypts it) ----
+  const setVault = (blob) => tx('meta', 'readwrite', (s) => s.put({ id: 'vault', blob }));
+  const getVault = () => tx('meta', 'readonly', (s) => s.get('vault')).then((r) => r && r.blob);
+
   // ---- delete account = wipe everything, no trace ----
   // Clear every store in one transaction (deterministic — no deleteDatabase
   // "blocked" race), then drop the database itself for good measure.
@@ -82,5 +86,5 @@
     }));
   }
 
-  root.Store = { saveContact, getContacts, getContact, addMessage, history, saveSelf, getSelf, wipe };
+  root.Store = { saveContact, getContacts, getContact, addMessage, history, saveSelf, getSelf, setVault, getVault, wipe };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
